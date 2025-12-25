@@ -25,9 +25,11 @@ import ToggleWatchedButton from "./ToggleWatchedButton";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 
 const getFormatImage = (format: ItemFormat, is3D: YesNo): string => {
-	let image = `/images/${format.replace(/[\s-]/g, "")}`;
-	if (is3D === "Y") image += "3D";
-	return `${image}.png`;
+	const formatName = format.replace(/[\s-]/g, "");
+	const suffix = is3D === "Y" ? "3D" : "";
+	// Use SVG for Ultra HD (better contrast on dark backgrounds)
+	const ext = formatName === "UltraHD" ? "svg" : "png";
+	return `/images/${formatName}${suffix}.${ext}`;
 };
 
 const getCaseIcon = (caseType: ItemCase): ReactNode => {
