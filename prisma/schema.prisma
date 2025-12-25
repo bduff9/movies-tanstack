@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model movitems {
+  itemid     Int       @id @default(autoincrement()) @map("ITEMID")
+  ordered    Int?      @unique @map("ORDERED")
+  itemname   String    @db.VarChar(99) @map("ITEMNAME")
+  itemcase   ItemCase  @map("ITEMCASE")
+  itemdigitl ItemDigitl @default(None) @map("ITEMDIGITL")
+  item3D     YesNo     @default(N) @map("ITEM3D")
+  itemwatch  YesNo     @default(N) @map("ITEMWATCH")
+  itemformat ItemFormat @map("ITEMFORMAT")
+  itemstatus ItemStatus @map("ITEMSTATUS")
+  itemavail  DateTime? @db.Date @map("ITEMAVAIL")
+  itemurl    String    @db.VarChar(99) @map("ITEMURL")
+  itemnotes  String?   @db.Text @map("ITEMNOTES")
+  movies     movies[]
+
+  @@index([itemname], map: "ITEMNAME")
+  @@index([itemcase], map: "ITEMCASE")
+  @@index([itemdigitl], map: "ITEMDIGITL")
+  @@index([item3D], map: "ITEM3D")
+  @@index([itemwatch], map: "ITEMWATCH")
+  @@index([itemformat], map: "ITEMFORMAT")
+  @@index([itemstatus], map: "ITEMSTATUS")
+  @@index([itemavail], map: "ITEMAVAIL")
+  @@index([itemurl], map: "ITEMURL")
+}
+
+model movies {
+  movieid    Int      @id @default(autoincrement()) @map("MOVIEID")
+  itemid     Int?     @map("ITEMID")
+  movietitle String?  @db.VarChar(99) @map("MOVIETITLE")
+  movieurl   String?  @db.VarChar(99) @map("MOVIEURL")
+  movitem    movitems? @relation(fields: [itemid], references: [itemid], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([itemid], map: "ITEMID")
+  @@index([movietitle], map: "MOVIETITLE")
+  @@index([movieurl], map: "MOVIEURL")
+}
+
+enum ItemCase {
+  Plain
+  Box
+  Slipcover
+  Digibook
+  Steelbook
+}
+
+enum ItemDigitl {
+  None
+  DC
+  UV
+  DC_UV @map("DC+UV")
+}
+
+enum YesNo {
+  Y
+  N
+}
+
+enum ItemFormat {
+  Blu_ray @map("Blu-ray")
+  DVD
+  Ultra_HD @map("Ultra HD")
+  UV
+  Digital
+}
+
+enum ItemStatus {
+  Owned
+  Wanted
+  Selling
+  Waiting
+}
