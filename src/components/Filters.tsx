@@ -85,7 +85,7 @@ const Filters: FC<Props> = ({ filterOpen, searchParams }) => {
 							<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 								<SelectValue placeholder="Select format..." />
 							</SelectTrigger>
-							<SelectContent className="bg-slate-900 border-slate-700">
+							<SelectContent className="bg-slate-900 border-slate-700 text-slate-200">
 								<SelectItem value="all">All Formats</SelectItem>
 								<SelectItem value="Blu-ray">Blu-ray</SelectItem>
 								<SelectItem value="DVD">DVD</SelectItem>
@@ -158,7 +158,7 @@ const Filters: FC<Props> = ({ filterOpen, searchParams }) => {
 							<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 								<SelectValue placeholder="Select digital type..." />
 							</SelectTrigger>
-							<SelectContent className="bg-slate-900 border-slate-700">
+							<SelectContent className="bg-slate-900 border-slate-700 text-slate-200">
 								<SelectItem value="all">All Types</SelectItem>
 								<SelectItem value="None">None</SelectItem>
 								<SelectItem value="DC">Digital Copy</SelectItem>
@@ -179,7 +179,7 @@ const Filters: FC<Props> = ({ filterOpen, searchParams }) => {
 							<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 								<SelectValue placeholder="Select case type..." />
 							</SelectTrigger>
-							<SelectContent className="bg-slate-900 border-slate-700">
+							<SelectContent className="bg-slate-900 border-slate-700 text-slate-200">
 								<SelectItem value="all">All Cases</SelectItem>
 								<SelectItem value="Plain">Plain</SelectItem>
 								<SelectItem value="Box">Box</SelectItem>
@@ -202,7 +202,7 @@ const Filters: FC<Props> = ({ filterOpen, searchParams }) => {
 							<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 								<SelectValue placeholder="Select status..." />
 							</SelectTrigger>
-							<SelectContent className="bg-slate-900 border-slate-700">
+							<SelectContent className="bg-slate-900 border-slate-700 text-slate-200">
 								<SelectItem value="all">All Statuses</SelectItem>
 								<SelectItem value="Owned">Owned</SelectItem>
 								<SelectItem value="Wanted">Wanted</SelectItem>

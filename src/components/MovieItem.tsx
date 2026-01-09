@@ -24,8 +24,15 @@ import MovieItemPlaceholder from "./MovieItemPlaceholder";
 import ToggleWatchedButton from "./ToggleWatchedButton";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 
+const FORMAT_FILE_MAP: Record<string, string> = {
+	"Blu-ray": "BluRay",
+	DVD: "DVD",
+	"Ultra HD": "UltraHD",
+	UV: "UV",
+};
+
 const getFormatImage = (format: ItemFormat, is3D: YesNo): string => {
-	const formatName = format.replace(/[\s-]/g, "");
+	const formatName = FORMAT_FILE_MAP[format] || format.replace(/[\s-]/g, "");
 	const suffix = is3D === "Y" ? "3D" : "";
 	// Use SVG for Ultra HD (better contrast on dark backgrounds)
 	const ext = formatName === "UltraHD" ? "svg" : "png";
