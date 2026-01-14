@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, RotateCcw, Save } from "lucide-react";
+import { ArrowLeft, Loader2, RotateCcw, Save, Trash2 } from "lucide-react";
 import type { FC, FormEvent } from "react";
 import { useState, useTransition } from "react";
 
@@ -13,7 +13,11 @@ import type {
 	MovitemsRow,
 	YesNo,
 } from "@/db/types";
-import { addMovieItem, editMovieItem } from "@/server/functions/movieItems";
+import {
+	addMovieItem,
+	deleteMovieItem,
+	editMovieItem,
+} from "@/server/functions/movieItems";
 import MovieItemPlaceholder from "./MovieItemPlaceholder";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -51,7 +55,9 @@ const defaultItem: MovitemsRow = {
 const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
+	const [isDeleting, startDeletingTransition] = useTransition();
 	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
 	// Form state - use controlled inputs
 	const [itemname, setItemname] = useState(movieItem.ITEMNAME);
@@ -93,6 +99,27 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 		setErrors({});
 	};
 
+	const handleDelete = () => {
+		if (!showDeleteConfirm) {
+			setShowDeleteConfirm(true);
+			return;
+		}
+
+		startDeletingTransition(async () => {
+			try {
+				await deleteMovieItem({ data: { itemId: movieItem.ITEMID } });
+				router.navigate({ to: "/" });
+			} catch (_error) {
+				setErrors({ form: "Failed to delete item. Please try again." });
+				setShowDeleteConfirm(false);
+			}
+		});
+	};
+
+	const handleCancelDelete = () => {
+		setShowDeleteConfirm(false);
+	};
+
 	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
@@ -113,7 +140,8 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 		// Basic validation
 		const newErrors: Record<string, string> = {};
 		if (!data.itemname) newErrors.itemname = "Title is required";
-		if (!data.itemurl) newErrors.itemurl = "Image URL is required";
+		// Image URL is only required when creating a new item
+		if (!isEditing && !data.itemurl) newErrors.itemurl = "Image URL is required";
 
 		if (Object.keys(newErrors).length > 0) {
 			setErrors(newErrors);
@@ -218,12 +246,12 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 								<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 									<SelectValue placeholder="Select format" />
 								</SelectTrigger>
-								<SelectContent className="bg-slate-900 border-slate-700">
-									<SelectItem value="Blu-ray">Blu-ray</SelectItem>
-									<SelectItem value="DVD">DVD</SelectItem>
-									<SelectItem value="Ultra HD">Ultra HD</SelectItem>
-									<SelectItem value="UV">UV</SelectItem>
-									<SelectItem value="Digital">Digital</SelectItem>
+								<SelectContent className="bg-slate-800 border-slate-700">
+									<SelectItem value="Blu-ray" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Blu-ray</SelectItem>
+									<SelectItem value="DVD" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">DVD</SelectItem>
+									<SelectItem value="Ultra HD" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Ultra HD</SelectItem>
+									<SelectItem value="UV" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">UV</SelectItem>
+									<SelectItem value="Digital" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Digital</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -241,7 +269,7 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 									<RadioGroupItem
 										value="Y"
 										id="item3D-Y"
-										className="border-slate-600"
+										className="border-slate-500 text-cyan-400 data-checked:border-cyan-400"
 									/>
 									<Label
 										htmlFor="item3D-Y"
@@ -254,7 +282,7 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 									<RadioGroupItem
 										value="N"
 										id="item3D-N"
-										className="border-slate-600"
+										className="border-slate-500 text-cyan-400 data-checked:border-cyan-400"
 									/>
 									<Label
 										htmlFor="item3D-N"
@@ -279,11 +307,11 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 								<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 									<SelectValue placeholder="Select digital type" />
 								</SelectTrigger>
-								<SelectContent className="bg-slate-900 border-slate-700">
-									<SelectItem value="None">None</SelectItem>
-									<SelectItem value="DC">Digital Copy</SelectItem>
-									<SelectItem value="UV">Ultraviolet</SelectItem>
-									<SelectItem value="DC+UV">
+								<SelectContent className="bg-slate-800 border-slate-700">
+									<SelectItem value="None" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">None</SelectItem>
+									<SelectItem value="DC" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Digital Copy</SelectItem>
+									<SelectItem value="UV" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Ultraviolet</SelectItem>
+									<SelectItem value="DC+UV" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">
 										Digital Copy + Ultraviolet
 									</SelectItem>
 								</SelectContent>
@@ -303,12 +331,12 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 								<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 									<SelectValue placeholder="Select case type" />
 								</SelectTrigger>
-								<SelectContent className="bg-slate-900 border-slate-700">
-									<SelectItem value="Plain">Plain</SelectItem>
-									<SelectItem value="Box">Box</SelectItem>
-									<SelectItem value="Digibook">Digibook</SelectItem>
-									<SelectItem value="Slipcover">Slipcover</SelectItem>
-									<SelectItem value="Steelbook">Steelbook</SelectItem>
+								<SelectContent className="bg-slate-800 border-slate-700">
+									<SelectItem value="Plain" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Plain</SelectItem>
+									<SelectItem value="Box" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Box</SelectItem>
+									<SelectItem value="Digibook" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Digibook</SelectItem>
+									<SelectItem value="Slipcover" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Slipcover</SelectItem>
+									<SelectItem value="Steelbook" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Steelbook</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -326,11 +354,11 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 								<SelectTrigger className="bg-slate-800 border-slate-700 text-slate-200">
 									<SelectValue placeholder="Select status" />
 								</SelectTrigger>
-								<SelectContent className="bg-slate-900 border-slate-700">
-									<SelectItem value="Owned">Owned</SelectItem>
-									<SelectItem value="Wanted">Wanted</SelectItem>
-									<SelectItem value="Selling">Selling</SelectItem>
-									<SelectItem value="Waiting">Waiting</SelectItem>
+								<SelectContent className="bg-slate-800 border-slate-700">
+									<SelectItem value="Owned" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Owned</SelectItem>
+									<SelectItem value="Wanted" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Wanted</SelectItem>
+									<SelectItem value="Selling" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Selling</SelectItem>
+									<SelectItem value="Waiting" className="text-slate-200 hover:bg-slate-700 focus:bg-slate-700 focus:text-slate-200">Waiting</SelectItem>
 								</SelectContent>
 							</Select>
 						</div>
@@ -363,7 +391,7 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 									<RadioGroupItem
 										value="Y"
 										id="itemwatch-Y"
-										className="border-slate-600"
+										className="border-slate-500 text-cyan-400 data-checked:border-cyan-400"
 									/>
 									<Label
 										htmlFor="itemwatch-Y"
@@ -376,7 +404,7 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 									<RadioGroupItem
 										value="N"
 										id="itemwatch-N"
-										className="border-slate-600"
+										className="border-slate-500 text-cyan-400 data-checked:border-cyan-400"
 									/>
 									<Label
 										htmlFor="itemwatch-N"
@@ -473,6 +501,35 @@ const MovieItemForm: FC<Props> = ({ movieItem = defaultItem }) => {
 							)}
 							Save
 						</Button>
+						{isEditing && (
+							<div className="ml-auto flex gap-2">
+								{showDeleteConfirm && (
+									<Button
+										type="button"
+										variant="outline"
+										onClick={handleCancelDelete}
+										disabled={isDeleting}
+										className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-300"
+									>
+										Cancel
+									</Button>
+								)}
+								<Button
+									type="button"
+									variant="destructive"
+									onClick={handleDelete}
+									disabled={isDeleting}
+									className={showDeleteConfirm ? "bg-red-600 hover:bg-red-700" : "bg-red-600/80 hover:bg-red-600"}
+								>
+									{isDeleting ? (
+										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+									) : (
+										<Trash2 className="w-4 h-4 mr-2" />
+									)}
+									{showDeleteConfirm ? "Confirm Delete" : "Delete"}
+								</Button>
+							</div>
+						)}
 					</div>
 				</form>
 			</CardContent>

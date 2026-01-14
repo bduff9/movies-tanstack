@@ -215,6 +215,24 @@ export const editMovieItem = createServerFn({ method: "POST" })
 		});
 	});
 
+export const deleteMovieItem = createServerFn({ method: "POST" })
+	.inputValidator((d: { itemId: number }) => d)
+	.handler(async (ctx) => {
+		const { itemId } = ctx.data;
+
+		return Sentry.startSpan({ name: "deleteMovieItem" }, async () => {
+			await requireAdmin();
+
+			// First delete all associated movies
+			await db.deleteFrom("movies").where("ITEMID", "=", itemId).execute();
+
+			// Then delete the movie item
+			await db.deleteFrom("movitems").where("ITEMID", "=", itemId).execute();
+
+			return { success: true };
+		});
+	});
+
 export const toggleWatched = createServerFn({ method: "POST" })
 	.inputValidator((d: { id: number }) => d)
 	.handler(async (ctx) => {
