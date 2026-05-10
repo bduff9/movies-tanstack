@@ -20,7 +20,7 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 import Filters from "./Filters";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -140,15 +140,15 @@ const Toolbar: FC<Props> = ({ maxPage, page, searchParams }) => {
 
 					{/* Actions */}
 					<div className="flex items-center gap-2">
-						<Link to="/item/add">
-							<Button
-								variant="default"
-								size="sm"
-								className="bg-cyan-600 hover:bg-cyan-700 text-white"
-							>
-								<Plus className="w-4 h-4 mr-1" />
-								Add Item
-							</Button>
+						<Link
+							to="/item/add"
+							className={cn(
+								buttonVariants({ variant: "default", size: "sm" }),
+								"bg-cyan-600 hover:bg-cyan-700 text-white",
+							)}
+						>
+							<Plus className="w-4 h-4 mr-1" />
+							Add Item
 						</Link>
 
 						<Button
@@ -171,15 +171,15 @@ const Toolbar: FC<Props> = ({ maxPage, page, searchParams }) => {
 						</Button>
 
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									variant="outline"
-									size="sm"
-									className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-300"
-								>
-									<ArrowUpDown className="w-4 h-4 mr-1" />
-									Sort
-								</Button>
+							<DropdownMenuTrigger
+								type="button"
+								className={cn(
+									buttonVariants({ variant: "outline", size: "sm" }),
+									"border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-300",
+								)}
+							>
+								<ArrowUpDown className="w-4 h-4 mr-1" />
+								Sort
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
 								align="end"

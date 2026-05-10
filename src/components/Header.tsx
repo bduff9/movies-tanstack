@@ -1,13 +1,11 @@
 "use client";
 
-import { SignInButton, UserButton, useAuth } from "@clerk/react";
+import { Show, SignInButton, UserButton } from "@clerk/react";
 import { Link } from "@tanstack/react-router";
 import { Film } from "lucide-react";
 import { Button } from "./ui/button";
 
 export default function Header() {
-	const { isLoaded, userId } = useAuth();
-
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl">
 			<div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -20,17 +18,9 @@ export default function Header() {
 					</span>
 				</Link>
 
-				<div className="flex min-h-10 min-w-10 items-center justify-end gap-4">
-					{!isLoaded ? null : userId ? (
-						<UserButton
-							appearance={{
-								elements: {
-									avatarBox: "h-9 w-9 ring-2 ring-cyan-500/30",
-								},
-							}}
-						/>
-					) : (
-						<SignInButton>
+				<div className="flex items-center gap-4">
+					<Show when="signed-out">
+						<SignInButton mode="modal">
 							<Button
 								variant="outline"
 								className="border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-200"
@@ -38,7 +28,16 @@ export default function Header() {
 								Sign In
 							</Button>
 						</SignInButton>
-					)}
+					</Show>
+					<Show when="signed-in">
+						<UserButton
+							appearance={{
+								elements: {
+									avatarBox: "h-9 w-9 ring-2 ring-cyan-500/30",
+								},
+							}}
+						/>
+					</Show>
 				</div>
 			</div>
 		</header>
