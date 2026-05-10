@@ -92,10 +92,20 @@ export const getMovieItems = createServerFn({ method: "GET" })
 			const total = totalResult?.count ?? 0;
 			const maxPage = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
 
-			// Calculate page
-			let page = searchParams.page ? Number.parseInt(searchParams.page) : 1;
-			if (page < 1) page = 1;
-			if (page > maxPage) page = maxPage;
+			// Calculate page (must never be NaN — Kysely/MySQL rejects NaN in LIMIT/OFFSET)
+			const rawPage = searchParams.page
+				?.trim()
+				.replace(/^["']+|["']+$/g, "");
+			let page = 1;
+			if (rawPage) {
+				const parsed = Number.parseInt(rawPage, 10);
+				if (Number.isFinite(parsed) && parsed >= 1) {
+					page = parsed;
+				}
+			}
+			if (page > maxPage) {
+				page = maxPage;
+			}
 
 			// Apply sorting
 			const sortField = searchParams.sort || "itemid";

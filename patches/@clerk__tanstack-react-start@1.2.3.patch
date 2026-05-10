@@ -1,0 +1,106 @@
+diff --git a/dist/client/ClerkProvider.js b/dist/client/ClerkProvider.js
+index 9b74af799bdecf6bf4d35c7f89ba78225716951d..7fa62d5f2d5652072368aed3dbc52ad0878312a4 100644
+--- a/dist/client/ClerkProvider.js
++++ b/dist/client/ClerkProvider.js
+@@ -1,7 +1,7 @@
+ import { InternalClerkProvider } from '@clerk/react/internal';
+ import { ScriptOnce } from '@tanstack/react-router';
+ import { getGlobalStartContext } from '@tanstack/react-start';
+-import { useEffect } from 'react';
++import { useCallback, useEffect } from 'react';
+ import { isClient } from '../utils/index.js';
+ import { ClerkOptionsProvider } from './OptionsContext.js';
+ import { useAwaitableNavigate } from './useAwaitableNavigate.js';
+@@ -36,6 +36,24 @@ function ClerkProvider({
+     __internal_keyless_claimKeylessApplicationUrl: __keylessClaimUrl,
+     __internal_keyless_copyInstanceKeysUrl: __keylessApiKeysUrl
+   } : {};
++  const routerPush = useCallback((to) => {
++    const { search, hash, ...rest } = parseUrlForNavigation(to, window.location.origin);
++    return awaitableNavigateRef.current?.({
++      ...rest,
++      search,
++      hash,
++      replace: false
++    });
++  }, []);
++  const routerReplace = useCallback((to) => {
++    const { search, hash, ...rest } = parseUrlForNavigation(to, window.location.origin);
++    return awaitableNavigateRef.current?.({
++      ...rest,
++      search,
++      hash,
++      replace: true
++    });
++  }, []);
+   return /* @__PURE__ */ jsxs(Fragment, { children: [
+     /* @__PURE__ */ jsx(ScriptOnce, { children: `window.__clerk_init_state = ${JSON.stringify(clerkInitialState)};` }),
+     /* @__PURE__ */ jsx(ClerkOptionsProvider, { options: mergedProps, children: /* @__PURE__ */ jsx(
+@@ -43,24 +61,8 @@ function ClerkProvider({
+       {
+         initialState: clerkSsrState,
+         sdkMetadata: SDK_METADATA,
+-        routerPush: (to) => {
+-          const { search, hash, ...rest } = parseUrlForNavigation(to, window.location.origin);
+-          return awaitableNavigateRef.current?.({
+-            ...rest,
+-            search,
+-            hash,
+-            replace: false
+-          });
+-        },
+-        routerReplace: (to) => {
+-          const { search, hash, ...rest } = parseUrlForNavigation(to, window.location.origin);
+-          return awaitableNavigateRef.current?.({
+-            ...rest,
+-            search,
+-            hash,
+-            replace: true
+-          });
+-        },
++        routerPush,
++        routerReplace,
+         ...mergedProps,
+         ...keylessProps,
+         children
+diff --git a/dist/client/useAwaitableNavigate.js b/dist/client/useAwaitableNavigate.js
+index 37c57d8d391f2430f19eae648c19b9a124fbedb4..7a8864d8e826748cb87bc12ba6a6aca5f11d432c 100644
+--- a/dist/client/useAwaitableNavigate.js
++++ b/dist/client/useAwaitableNavigate.js
+@@ -1,7 +1,10 @@
+ import { useNavigate, useLocation } from '@tanstack/react-router';
+-import React, { useTransition } from 'react';
++import React, { useCallback, useTransition } from 'react';
+ 
+ // src/client/useAwaitableNavigate.ts
++// Memoize the returned navigate function so ClerkProvider's effect (and Clerk's
++// InternalClerkProvider) do not see a new callback every render — that mismatch
++// can trigger "Maximum update depth exceeded" (React #185) in production.
+ var useAwaitableNavigate = () => {
+   const navigate = useNavigate();
+   const location = useLocation();
+@@ -14,14 +17,17 @@ var useAwaitableNavigate = () => {
+   React.useEffect(() => {
+     resolveAll();
+   }, [location]);
+-  return (options) => {
+-    return new Promise((res) => {
+-      startTransition(() => {
+-        resolveFunctionsRef.current.push(res);
+-        res(navigate(options));
++  return useCallback(
++    (options) => {
++      return new Promise((res) => {
++        startTransition(() => {
++          resolveFunctionsRef.current.push(res);
++          res(navigate(options));
++        });
+       });
+-    });
+-  };
++    },
++    [navigate, startTransition]
++  );
+ };
+ 
+ export { useAwaitableNavigate };
