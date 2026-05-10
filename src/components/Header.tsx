@@ -1,9 +1,4 @@
-import {
-	SignedIn,
-	SignedOut,
-	SignInButton,
-	UserButton,
-} from "@clerk/tanstack-start";
+import { Show, SignInButton, UserButton } from "@clerk/react";
 import { Link } from "@tanstack/react-router";
 import { Film } from "lucide-react";
 import { Button } from "./ui/button";
@@ -22,7 +17,7 @@ export default function Header() {
 				</Link>
 
 				<div className="flex items-center gap-4">
-					<SignedOut>
+					<Show when="signed-out">
 						<SignInButton mode="modal">
 							<Button
 								variant="outline"
@@ -31,8 +26,8 @@ export default function Header() {
 								Sign In
 							</Button>
 						</SignInButton>
-					</SignedOut>
-					<SignedIn>
+					</Show>
+					<Show when="signed-in">
 						<UserButton
 							appearance={{
 								elements: {
@@ -40,7 +35,7 @@ export default function Header() {
 								},
 							}}
 						/>
-					</SignedIn>
+					</Show>
 				</div>
 			</div>
 		</header>

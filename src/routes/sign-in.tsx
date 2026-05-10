@@ -1,6 +1,6 @@
 "use client";
 
-import { SignIn } from "@clerk/tanstack-start";
+import { SignIn } from "@clerk/tanstack-react-start";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/sign-in")({

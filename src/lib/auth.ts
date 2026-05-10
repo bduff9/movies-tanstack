@@ -8,9 +8,8 @@ import {
 const ADMIN_EMAIL = "bduff9@gmail.com";
 
 /**
- * Authenticate a request using Clerk's backend SDK directly.
- * This bypasses the @clerk/tanstack-start getAuth which uses vinxi's getEvent()
- * that doesn't work inside TanStack Start server functions.
+ * Authenticate a request using Clerk's backend SDK directly inside server functions.
+ * (TanStack Start server context differs from the document `clerkMiddleware` path.)
  */
 async function authenticateRequestDirect(request: Request) {
 	const secretKey = process.env.CLERK_SECRET_KEY;
