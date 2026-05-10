@@ -54,7 +54,9 @@ const Toolbar: FC<Props> = ({ maxPage, page, searchParams }) => {
 	};
 
 	const handleSortChange = (newSort: SortOption) => {
-		const newOrder = sort === newSort && order === "desc" ? "asc" : "desc";
+		// New column: start ascending. Same column: toggle direction.
+		const newOrder: OrderDirection =
+			sort === newSort ? (order === "asc" ? "desc" : "asc") : "asc";
 		router.navigate({
 			to: "/",
 			search: { ...searchParams, sort: newSort, order: newOrder },
