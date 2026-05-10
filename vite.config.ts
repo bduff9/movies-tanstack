@@ -1,14 +1,15 @@
 import tailwindcss from '@tailwindcss/vite'
+import babel from '@rolldown/plugin-babel'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import viteReact from '@vitejs/plugin-react'
+import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
 import { defineConfig } from 'vite'
-import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 const config = defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
+    tsconfigPaths: true,
   },
   optimizeDeps: {
     include: ['react', 'react-dom'],
@@ -18,17 +19,10 @@ const config = defineConfig({
     nitro({
       preset: process.env.NITRO_PRESET || 'node-server',
     }),
-    // this is the plugin that enables path aliases
-    viteTsConfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
     tailwindcss(),
     tanstackStart(),
-    viteReact({
-      babel: {
-        plugins: ['babel-plugin-react-compiler'],
-      },
-    }),
+    viteReact(),
+    babel({ presets: [reactCompilerPreset()] }),
   ],
 })
 
