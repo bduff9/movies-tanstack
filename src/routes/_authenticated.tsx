@@ -1,11 +1,7 @@
 "use client";
 
-import {
-	RedirectToSignIn,
-	SignedIn,
-	SignedOut,
-} from "@clerk/tanstack-start";
-import { Outlet, createFileRoute, useLocation } from "@tanstack/react-router";
+import { RedirectToSignIn, SignedIn, SignedOut } from "@clerk/tanstack-start";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
 	component: AuthenticatedLayout,
@@ -13,6 +9,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedLayout() {
 	const location = useLocation();
+	const returnUrl = `${location.pathname}${location.search}`;
 
 	return (
 		<>
@@ -21,11 +18,10 @@ function AuthenticatedLayout() {
 			</SignedIn>
 			<SignedOut>
 				<RedirectToSignIn
-					signInForceRedirectUrl={location.pathname}
+					signInForceRedirectUrl={returnUrl}
 					signInFallbackRedirectUrl="/"
 				/>
 			</SignedOut>
 		</>
 	);
 }
-
