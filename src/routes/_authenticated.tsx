@@ -14,9 +14,14 @@ function AuthenticatedLayout() {
 	const location = useLocation();
 	const returnUrl = `${location.pathname}${location.search}`;
 	const redirectIssuedForUrl = useRef<string | null>(null);
+	const redirectToSignInRef = useRef(clerk.redirectToSignIn);
+	redirectToSignInRef.current = clerk.redirectToSignIn;
 
 	useEffect(() => {
-		if (!isLoaded || userId) {
+		if (!isLoaded) {
+			return;
+		}
+		if (userId) {
 			redirectIssuedForUrl.current = null;
 			return;
 		}
@@ -24,11 +29,11 @@ function AuthenticatedLayout() {
 			return;
 		}
 		redirectIssuedForUrl.current = returnUrl;
-		void clerk.redirectToSignIn({
+		void redirectToSignInRef.current({
 			signInForceRedirectUrl: returnUrl,
 			signInFallbackRedirectUrl: "/",
 		});
-	}, [clerk, isLoaded, returnUrl, userId]);
+	}, [isLoaded, returnUrl, userId]);
 
 	if (!isLoaded) {
 		return null;

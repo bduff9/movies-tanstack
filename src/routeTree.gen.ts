@@ -41,8 +41,8 @@ const AuthenticatedItemItemIdRoute = AuthenticatedItemItemIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/sign-in': typeof SignInRoute
   '/': typeof AuthenticatedIndexRoute
+  '/sign-in': typeof SignInRoute
   '/item/$itemId': typeof AuthenticatedItemItemIdRoute
   '/item/add': typeof AuthenticatedItemAddRoute
 }
@@ -62,7 +62,7 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/sign-in' | '/' | '/item/$itemId' | '/item/add'
+  fullPaths: '/' | '/sign-in' | '/item/$itemId' | '/item/add'
   fileRoutesByTo: FileRoutesByTo
   to: '/sign-in' | '/' | '/item/$itemId' | '/item/add'
   id:
@@ -91,7 +91,7 @@ declare module '@tanstack/react-router' {
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -144,10 +144,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
